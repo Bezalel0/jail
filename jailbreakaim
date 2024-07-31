@@ -64,10 +64,10 @@ local function applyESP()
     end
 end
 
--- Refresh ESP every 5 seconds
-RunService.Heartbeat:Connect(function()
-    applyESP()
-end)
-
--- Apply ESP initially
+-- Apply ESP and refresh every 5 seconds
 applyESP()
+RunService.Heartbeat:Connect(function()
+    if tick() % 5 < 0.03 then
+        applyESP()
+    end
+end)
