@@ -42,7 +42,6 @@ local function CreateESPName(player)
     Name.Center = true
     Name.Outline = true
     Name.Visible = false
-
     return Name
 end
 
@@ -72,6 +71,8 @@ local function UpdateESPName(player, espName)
 end
 
 local ESPNames = {}
+local MAX_DISTANCE = 500 -- Max distance for ESP updates
+local MAX_VISIBLE_PLAYERS = 50 -- Max number of visible players to process
 
 local function CreateESPForPlayer(player)
     if player ~= LocalPlayer then
@@ -94,9 +95,33 @@ Players.PlayerAdded:Connect(CreateESPForPlayer)
 Players.PlayerRemoving:Connect(RemoveESPForPlayer)
 
 local function UpdateAllESP()
+    local visiblePlayers = {}
+    
     for player, espName in pairs(ESPNames) do
-        UpdateESPName(player, espName)
+        if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            local distance = (player.Character.HumanoidRootPart.Position - LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
+            if distance < MAX_DISTANCE then
+                table.insert(visiblePlayers, player)
+            else
+                espName.Visible = false
+            end
+        else
+            espName.Visible = false
+        end
+    end
+
+    for i = 1, math.min(#visiblePlayers, MAX_VISIBLE_PLAYERS) do
+        UpdateESPName(visiblePlayers[i], ESPNames[visiblePlayers[i]])
     end
 end
 
-RunService.RenderStepped:Connect(UpdateAllESP)
+local updateInterval = 0.5 -- Update every 0.5 seconds
+local lastUpdate = 0
+
+RunService.RenderStepped:Connect(function(deltaTime)
+    lastUpdate = lastUpdate + deltaTime
+    if lastUpdate >= updateInterval then
+        UpdateAllESP()
+        lastUpdate = 0
+    end
+end)
