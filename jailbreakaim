@@ -29,13 +29,50 @@ local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local RunService = game:GetService("RunService")
 
-local function createESPBox(part, color)
-    if part:FindFirstChild("ESPBox") then
-        part.ESPBox:Destroy()
-    end
+local function createESPBox(character, color)
+    local hrp = character:FindFirstChild("HumanoidRootPart")
+    if hrp then
+        local box = hrp:FindFirstChild("ESPBox")
+        if box then
+            box:Destroy()
+        end
 
-    local BoxHandleAdornment = Instance.new("BoxHandleAdornment")
-    BoxHandleAdornment.Name = "ESPBox"
-    BoxHandleAdornment.Size = Vector3.new(4, 6, 4) -- Increased size
-    BoxHandleAdornment.Adornee = part
-    BoxHandleAdornment.Color3 =
+        local BoxHandleAdornment = Instance.new("BoxHandleAdornment")
+        BoxHandleAdornment.Name = "ESPBox"
+        BoxHandleAdornment.Size = Vector3.new(4, 7, 4) -- Adjust the size as needed
+        BoxHandleAdornment.Adornee = hrp
+        BoxHandleAdornment.Color3 = color
+        BoxHandleAdornment.AlwaysOnTop = true
+        BoxHandleAdornment.ZIndex = 0
+        BoxHandleAdornment.Transparency = 0.5 -- Adjust transparency as needed
+        BoxHandleAdornment.Parent = hrp
+    end
+end
+
+local function applyESP()
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            local color
+            if player.TeamColor == BrickColor.new("Bright red") then
+                color = Color3.fromRGB(255, 0, 0) -- Red for criminals
+            elseif player.TeamColor == BrickColor.new("Bright orange") then
+                color = Color3.fromRGB(255, 165, 0) -- Orange for prisoners
+            elseif player.TeamColor == BrickColor.new("Bright blue") then
+                color = Color3.fromRGB(173, 216, 230) -- Light blue for cops
+            end
+
+            if color then
+                createESPBox(player.Character, color)
+            end
+        end
+    end
+end
+
+-- Apply ESP and refresh every 5 seconds
+applyESP()
+RunService.Heartbeat:Connect(function()
+    if tick() % 5 < 0.03 then
+        applyESP()
+    end
+end)
+
