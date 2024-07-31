@@ -1,105 +1,32 @@
--- Combined ESP and Aimbot Script for Roblox Jailbreak
-
--- Service references
-local Players = game:GetService("Players")
-local Workspace = game:GetService("Workspace")
-local RunService = game:GetService("RunService")
-local Camera = Workspace.CurrentCamera
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-
--- ESP Settings
-local outlineColor = {
-    Criminal = Color3.fromRGB(255, 0, 0),   -- Red for Criminals
-    Prisoner = Color3.fromRGB(255, 165, 0), -- Orange for Prisoners
-    Police = Color3.fromRGB(0, 0, 255)      -- Blue for Police
-}
-
--- Utility function to create ESP outline
-local function createESP(player, color)
-    local char = player.Character
-    if not char then return end
-
-    local humanoidRootPart = char:FindFirstChild("HumanoidRootPart")
-    if not humanoidRootPart then return end
-
-    -- Create the ESP outline
-    local espOutline = Instance.new("Model")
-    espOutline.Name = "ESPOutline"
-    espOutline.Parent = char
-
-    local function createPart(size)
-        local part = Instance.new("BoxHandleAdornment")
-        part.Adornee = humanoidRootPart
-        part.Size = size
-        part.Color3 = color
-        part.Transparency = 0.5
-        part.ZIndex = 10
-        part.Parent = espOutline
-        return part
-    end
-
-    local headPart = createPart(Vector3.new(4, 4, 1))
-    local torsoPart = createPart(Vector3.new(2, 4, 1))
-    local armPart = createPart(Vector3.new(1, 4, 1))
+local function createESP(player)
+    -- Creates a visual box around the player
+    local espBox = Instance.new("BoxHandleAdornment")
+    espBox.Adornee = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+    espBox.Size = Vector3.new(2, 5, 2) -- Size of the ESP box
+    espBox.Color3 = (player.Team.Name == "Police") and Color3.fromRGB(0, 0, 255) or
+                    (player.Team.Name == "Criminals") and Color3.fromRGB(255, 0, 0) or
+                    (player.Team.Name == "Prisoners") and Color3.fromRGB(255, 165, 0) or
+                    Color3.fromRGB(255, 255, 255) -- Default color if team is unknown
+    espBox.Transparency = 0.5
+    espBox.AlwaysOnTop = true
+    espBox.Parent = player.Character
 end
 
--- Function to check and apply ESP
-local function applyESP()
-    for _, player in pairs(Players:GetPlayers()) do
-        if player.Team then
-            local team = player.Team.Name
-            local color
-            if team == "Criminal" then
-                color = outlineColor.Criminal
-            elseif team == "Prisoner" then
-                color = outlineColor.Prisoner
-            elseif team == "Police" then
-                color = outlineColor.Police
-            end
-
-            if color then
-                createESP(player, color)
-            end
+local function updateESP()
+    -- Applies ESP to all players
+    for _, player in ipairs(game:GetService("Players"):GetPlayers()) do
+        if player ~= game:GetService("Players").LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            createESP(player)
         end
     end
 end
 
--- Update ESP periodically
-RunService.Heartbeat:Connect(applyESP)
-
--- Remove ESP for players who leave
-Players.PlayerRemoving:Connect(function(player)
-    local char = player.Character
-    if char then
-        local espOutline = char:FindFirstChild("ESPOutline")
-        if espOutline then
-            espOutline:Destroy()
-        end
-    end
+-- Auto-update ESP for new or respawned players
+game:GetService("Players").PlayerAdded:Connect(function(player)
+    player.CharacterAdded:Connect(function()
+        createESP(player)
+    end)
 end)
 
--- Aimbot logic
-getgenv().toggled = true --/ true & false
-
-getgenv().old = getgenv().old or require(ReplicatedStorage.Module.RayCast).RayIgnoreNonCollideWithIgnoreList
-
-if getgenv().toggled then
-    require(ReplicatedStorage.Module.RayCast).RayIgnoreNonCollideWithIgnoreList = function(...)
-        local nearestDistance, nearestEnemy = 600, nil
-        for i, v in pairs(Players:GetPlayers()) do
-            if v.Team ~= Players.LocalPlayer.Team and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
-                if (v.Character.HumanoidRootPart.Position - Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude < nearestDistance then
-                    nearestDistance, nearestEnemy = (v.Character.HumanoidRootPart.Position - Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude, v
-                end
-            end
-        end
-        local arg = {getgenv().old(...)}
-        if (tostring(getfenv(2).script) == "BulletEmitter" or tostring(getfenv(2).script) == "Taser") and nearestEnemy then
-            arg[1] = nearestEnemy.Character.HumanoidRootPart
-            arg[2] = nearestEnemy.Character.HumanoidRootPart.Position
-        end
-        return unpack(arg)
-    end
-else
-    require(ReplicatedStorage.Module.RayCast).RayIgnoreNonCollideWithIgnoreList = getgenv().old
-end
+-- Update ESP on existing players
+updateESP()
