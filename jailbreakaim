@@ -33,13 +33,7 @@ end
 local ESP = {}
 ESP.Enabled = true
 
-local function CreateESPBox(player)
-    local Box = Drawing.new("Square")
-    Box.Thickness = 2
-    Box.Transparency = 1
-    Box.Color = Color3.new(1, 1, 1)
-    Box.Visible = false
-
+local function CreateESPName(player)
     local Name = Drawing.new("Text")
     Name.Text = player.Name
     Name.Size = 20
@@ -48,13 +42,12 @@ local function CreateESPBox(player)
     Name.Outline = true
     Name.Visible = false
 
-    return {Box = Box, Name = Name}
+    return Name
 end
 
-local function UpdateESPBox(player, esp)
+local function UpdateESPName(player, espName)
     if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then
-        esp.Box.Visible = false
-        esp.Name.Visible = false
+        espName.Visible = false
         return
     end
 
@@ -62,57 +55,44 @@ local function UpdateESPBox(player, esp)
     local RootPosition, onScreen = Camera:WorldToViewportPoint(RootPart.Position)
 
     if onScreen and ESP.Enabled then
-        local BoxSize = Vector3.new(4, 7, 0)
-        local TopLeft = Camera:WorldToViewportPoint((RootPart.CFrame * CFrame.new(-BoxSize.X, BoxSize.Y, 0)).p)
-        local BottomRight = Camera:WorldToViewportPoint((RootPart.CFrame * CFrame.new(BoxSize.X, -BoxSize.Y, 0)).p)
-
-        esp.Box.Size = Vector2.new(BottomRight.X - TopLeft.X, BottomRight.Y - TopLeft.Y)
-        esp.Box.Position = Vector2.new(RootPosition.X - esp.Box.Size.X / 2, RootPosition.Y - esp.Box.Size.Y / 2)
-        esp.Box.Visible = true
-
-        esp.Name.Position = Vector2.new(RootPosition.X, RootPosition.Y - esp.Box.Size.Y / 2 - 15)
-        esp.Name.Visible = true
+        espName.Position = Vector2.new(RootPosition.X, RootPosition.Y - 15)
+        espName.Visible = true
 
         if player.Team.Name == "Police" then
-            esp.Box.Color = Color3.fromRGB(0, 0, 255)
-            esp.Name.Color = Color3.fromRGB(0, 0, 255)
+            espName.Color = Color3.fromRGB(0, 0, 255)
         elseif player.Team.Name == "Criminal" then
-            esp.Box.Color = Color3.fromRGB(255, 0, 0)
-            esp.Name.Color = Color3.fromRGB(255, 0, 0)
+            espName.Color = Color3.fromRGB(255, 0, 0)
         else -- Prisoner
-            esp.Box.Color = Color3.fromRGB(255, 165, 0)
-            esp.Name.Color = Color3.fromRGB(255, 165, 0)
+            espName.Color = Color3.fromRGB(255, 165, 0)
         end
     else
-        esp.Box.Visible = false
-        esp.Name.Visible = false
+        espName.Visible = false
     end
 end
 
-local ESPBoxes = {}
+local ESPNames = {}
 
 for _, player in pairs(Players:GetPlayers()) do
     if player ~= LocalPlayer then
-        ESPBoxes[player] = CreateESPBox(player)
+        ESPNames[player] = CreateESPName(player)
     end
 end
 
 Players.PlayerAdded:Connect(function(player)
     if player ~= LocalPlayer then
-        ESPBoxes[player] = CreateESPBox(player)
+        ESPNames[player] = CreateESPName(player)
     end
 end)
 
 Players.PlayerRemoving:Connect(function(player)
-    if ESPBoxes[player] then
-        ESPBoxes[player].Box:Remove()
-        ESPBoxes[player].Name:Remove()
-        ESPBoxes[player] = nil
+    if ESPNames[player] then
+        ESPNames[player]:Remove()
+        ESPNames[player] = nil
     end
 end)
 
 RunService.RenderStepped:Connect(function()
-    for player, esp in pairs(ESPBoxes) do
-        UpdateESPBox(player, esp)
+    for player, espName in pairs(ESPNames) do
+        UpdateESPName(player, espName)
     end
 end)
