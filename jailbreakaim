@@ -58,11 +58,12 @@ local function createESPBox(character, color)
     end
 end
 
+-- Function to apply ESP for all players
 local function applyESP()
     for _, player in pairs(Players:GetPlayers()) do
         if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
             local color
-            local team = player.Team.Name
+            local team = player.Team and player.Team.Name -- Ensure player.Team is not nil
 
             if team == "Criminals" then
                 color = Color3.fromRGB(200, 0, 0) -- Darker red for criminals
@@ -80,9 +81,6 @@ local function applyESP()
 end
 
 -- Apply ESP and refresh every 5 seconds
-applyESP()
 RunService.Heartbeat:Connect(function()
-    if tick() % 5 < 0.03 then
-        applyESP()
-    end
+    applyESP()
 end)
