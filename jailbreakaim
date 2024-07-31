@@ -1,8 +1,9 @@
--- Combined ESP and Aimbot Script
+-- Optimized ESP and Aimbot Script
 
 -- Settings
 local MAX_DISTANCE = 200
 local TOGGLE_AIMBOT = true -- Set to true to enable aimbot
+local ESP_REFRESH_INTERVAL = 2 -- Seconds between ESP updates
 
 -- Services
 local Players = game:GetService("Players")
@@ -20,8 +21,8 @@ local function createOrUpdateESP(character, color)
             esp = Instance.new("BillboardGui")
             esp.Name = "ESP"
             esp.Adornee = hrp
-            esp.Size = UDim2.new(0, 100, 0, 100) -- Size of the ESP box
-            esp.StudsOffset = Vector3.new(0, 2, 0) -- Offset above the player
+            esp.Size = UDim2.new(0, 50, 0, 50) -- Smaller size for mobile
+            esp.StudsOffset = Vector3.new(0, 3, 0) -- Adjusted vertical offset
             esp.AlwaysOnTop = true
             esp.LightInfluence = 0 -- Ensures visibility in all lighting conditions
             esp.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
@@ -78,11 +79,11 @@ local function applyESP()
     end
 end
 
--- Function to update player ESP distance
+-- Function to refresh ESP every ESP_REFRESH_INTERVAL seconds
 local function refreshESP()
     while true do
         applyESP()
-        wait(2) -- Refresh interval
+        wait(ESP_REFRESH_INTERVAL) -- Refresh interval
     end
 end
 
@@ -117,4 +118,5 @@ RunService.Heartbeat:Connect(function()
     aimbot()
 end)
 
-refreshESP()
+-- Start ESP refresh loop
+coroutine.wrap(refreshESP)()
