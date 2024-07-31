@@ -24,63 +24,69 @@ else
     require(game:GetService("ReplicatedStorage").Module.RayCast).RayIgnoreNonCollideWithIgnoreList = getgenv().old
 end
 
--- ESP Script with Enhanced Visibility
+-- Enhanced ESP Script
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local RunService = game:GetService("RunService")
 
--- Function to create an ESP Box with improved visibility
-local function createESPBox(character, color)
+-- Function to create or update an ESP box
+local function createOrUpdateESP(character, color)
     local hrp = character:FindFirstChild("HumanoidRootPart")
     if hrp then
         local esp = hrp:FindFirstChild("ESP")
-        if esp then
-            esp:Destroy()
+        if not esp then
+            esp = Instance.new("BillboardGui")
+            esp.Name = "ESP"
+            esp.Adornee = hrp
+            esp.Size = UDim2.new(0, 150, 0, 150) -- Size of the ESP box
+            esp.StudsOffset = Vector3.new(0, 2, 0) -- Offset above the player
+            esp.AlwaysOnTop = true
+            esp.LightInfluence = 0 -- Ensures visibility in all lighting conditions
+            esp.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+            esp.Parent = hrp
+            
+            local frame = Instance.new("Frame")
+            frame.Parent = esp
+            frame.BackgroundColor3 = color
+            frame.Size = UDim2.new(1, 0, 1, 0)
+            frame.BorderSizePixel = 0
+            frame.BackgroundTransparency = 0.5 -- Semi-transparent for visibility through walls
+        else
+            -- Update the color if ESP already exists
+            esp.Frame.BackgroundColor3 = color
         end
-
-        -- Create a BillboardGui for improved visibility
-        local billboardGui = Instance.new("BillboardGui")
-        billboardGui.Name = "ESP"
-        billboardGui.Parent = hrp
-        billboardGui.Adornee = hrp
-        billboardGui.Size = UDim2.new(0, 150, 0, 150) -- Adjust size for better visibility
-        billboardGui.StudsOffset = Vector3.new(0, 2, 0) -- Offset the ESP above the player
-        billboardGui.AlwaysOnTop = true
-        billboardGui.LightInfluence = 0 -- Ensures the ESP box is visible in all lighting conditions
-        billboardGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-
-        local frame = Instance.new("Frame")
-        frame.Parent = billboardGui
-        frame.BackgroundColor3 = color
-        frame.Size = UDim2.new(1, 0, 1, 0)
-        frame.BorderSizePixel = 0
-        frame.BackgroundTransparency = 0.5 -- Semi-transparent for visibility through walls
     end
 end
 
--- Function to apply ESP for all players
+-- Function to apply ESP to all players
 local function applyESP()
     for _, player in pairs(Players:GetPlayers()) do
         if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
             local color
-            local team = player.Team and player.Team.Name -- Ensure player.Team is not nil
+            local team = player.Team and player.Team.Name
 
             if team == "Criminals" then
-                color = Color3.fromRGB(200, 0, 0) -- Darker red for criminals
+                color = Color3.fromRGB(200, 0, 0) -- Red for criminals
             elseif team == "Cops" then
-                color = Color3.fromRGB(0, 0, 200) -- Darker blue for cops
+                color = Color3.fromRGB(0, 0, 255) -- Blue for cops
             elseif team == "Prisoners" then
-                color = Color3.fromRGB(200, 100, 0) -- Darker orange for prisoners
+                color = Color3.fromRGB(255, 165, 0) -- Orange for prisoners
             end
 
             if color then
-                createESPBox(player.Character, color)
+                createOrUpdateESP(player.Character, color)
             end
         end
     end
 end
 
--- Apply ESP and refresh every 5 seconds
-RunService.Heartbeat:Connect(function()
-    applyESP()
-end)
+-- Refresh ESP every 2 seconds
+local function refreshESP()
+    while true do
+        applyESP()
+        wait(2) -- Refresh interval
+    end
+end
+
+-- Start the ESP refresh loop
+refreshESP()
