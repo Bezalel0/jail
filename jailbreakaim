@@ -1,18 +1,15 @@
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local UserInputService = game:GetService("UserInputService")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
+-- Aimbot Script
+getgenv().toggled = true -- Set to true or false to enable/disable aimbot
 
--- Aimbot code (unchanged)
-getgenv().toggled = true --/ true & false
-getgenv().old = getgenv().old or require(ReplicatedStorage.Module.RayCast).RayIgnoreNonCollideWithIgnoreList
+getgenv().old = getgenv().old or require(game:GetService("ReplicatedStorage").Module.RayCast).RayIgnoreNonCollideWithIgnoreList
+
 if getgenv().toggled then
-    require(ReplicatedStorage.Module.RayCast).RayIgnoreNonCollideWithIgnoreList = function(...)
+    require(game:GetService("ReplicatedStorage").Module.RayCast).RayIgnoreNonCollideWithIgnoreList = function(...)
         local nearestDistance, nearestEnemy = 600, nil
-        for i,v in pairs(Players:GetPlayers()) do
-            if v.Team ~= Players.LocalPlayer.Team and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
-                if (v.Character.HumanoidRootPart.Position - Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude < nearestDistance then
-                    nearestDistance, nearestEnemy = (v.Character.HumanoidRootPart.Position - Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude, v
+        for i, v in pairs(game:GetService("Players"):GetPlayers()) do
+            if v.Team ~= game:GetService("Players").LocalPlayer.Team and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
+                if (v.Character.HumanoidRootPart.Position - game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position).Magnitude < nearestDistance then
+                    nearestDistance, nearestEnemy = (v.Character.HumanoidRootPart.Position - game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position).Magnitude, v
                 end
             end
         end
@@ -24,86 +21,66 @@ if getgenv().toggled then
         return unpack(arg)
     end
 else
-    require(ReplicatedStorage.Module.RayCast).RayIgnoreNonCollideWithIgnoreList = getgenv().old
+    require(game:GetService("ReplicatedStorage").Module.RayCast).RayIgnoreNonCollideWithIgnoreList = getgenv().old
 end
 
--- ESP Code
-local espEnabled = false
-local espFolderName = "ESP_FOLDER"
+-- ESP Script with Enhanced Visibility
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local RunService = game:GetService("RunService")
 
-local function createESP(player)
-    local esp = Drawing.new("Text")
-    esp.Visible = false
-    esp.Center = true
-    esp.Outline = true
-    esp.Font = 2
-    esp.Size = 13
-    esp.Color = Color3.new(1, 1, 1)
-    esp.OutlineColor = Color3.new(0, 0, 0)
-    return esp
-end
-
-local function getTeamColor(player)
-    if player.Team then
-        if player.Team.Name == "Police" then
-            return Color3.new(0, 0, 1) -- Blue
-        elseif player.Team.Name == "Criminal" then
-            return Color3.new(1, 0, 0) -- Red
-        elseif player.Team.Name == "Prisoner" then
-            return Color3.new(1, 0.5, 0) -- Orange
+-- Function to create an ESP Box with improved visibility
+local function createESPBox(character, color)
+    local hrp = character:FindFirstChild("HumanoidRootPart")
+    if hrp then
+        local esp = hrp:FindFirstChild("ESP")
+        if esp then
+            esp:Destroy()
         end
+
+        -- Create a BillboardGui for improved visibility
+        local billboardGui = Instance.new("BillboardGui")
+        billboardGui.Name = "ESP"
+        billboardGui.Parent = hrp
+        billboardGui.Adornee = hrp
+        billboardGui.Size = UDim2.new(0, 150, 0, 150) -- Adjust size for better visibility
+        billboardGui.StudsOffset = Vector3.new(0, 2, 0) -- Offset the ESP above the player
+        billboardGui.AlwaysOnTop = true
+        billboardGui.LightInfluence = 0 -- Ensures the ESP box is visible in all lighting conditions
+        billboardGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+        local frame = Instance.new("Frame")
+        frame.Parent = billboardGui
+        frame.BackgroundColor3 = color
+        frame.Size = UDim2.new(1, 0, 1, 0)
+        frame.BorderSizePixel = 0
+        frame.BackgroundTransparency = 0.5 -- Semi-transparent for visibility through walls
     end
-    return Color3.new(1, 1, 1) -- White for unknown
 end
 
-local espObjects = {}
+-- Function to apply ESP for all players
+local function applyESP()
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            local color
+            local team = player.Team and player.Team.Name -- Ensure player.Team is not nil
 
-local function updateESP()
-    for _, player in ipairs(Players:GetPlayers()) do
-        if player ~= Players.LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-            local esp = espObjects[player]
-            if not esp then
-                esp = createESP(player)
-                espObjects[player] = esp
+            if team == "Criminals" then
+                color = Color3.fromRGB(200, 0, 0) -- Darker red for criminals
+            elseif team == "Cops" then
+                color = Color3.fromRGB(0, 0, 200) -- Darker blue for cops
+            elseif team == "Prisoners" then
+                color = Color3.fromRGB(200, 100, 0) -- Darker orange for prisoners
             end
 
-            if espEnabled then
-                local vector, onScreen = workspace.CurrentCamera:WorldToViewportPoint(player.Character.HumanoidRootPart.Position)
-                if onScreen then
-                    esp.Position = Vector2.new(vector.X, vector.Y)
-                    local distance = (player.Character.HumanoidRootPart.Position - Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
-                    esp.Text = string.format("%s [%d]", player.Name, math.floor(distance))
-                    esp.Color = getTeamColor(player)
-                    esp.Visible = true
-                else
-                    esp.Visible = false
-                end
-            else
-                esp.Visible = false
+            if color then
+                createESPBox(player.Character, color)
             end
         end
     end
 end
 
-local function toggleESP()
-    espEnabled = not espEnabled
-    for _, esp in pairs(espObjects) do
-        esp.Visible = espEnabled
-    end
-end
-
-RunService.RenderStepped:Connect(updateESP)
-
-UserInputService.InputBegan:Connect(function(input)
-    if input.KeyCode == Enum.KeyCode.E then
-        toggleESP()
-    end
-end)
-
-Players.PlayerRemoving:Connect(function(player)
-    local esp = espObjects[player]
-    if esp then
-        esp:Remove()
-        espObjects[player] = nil
-    end
+-- Apply ESP and refresh every 5 seconds
+RunService.Heartbeat:Connect(function()
+    applyESP()
 end)
