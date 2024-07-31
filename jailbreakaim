@@ -1,5 +1,3 @@
--- Combined ESP and Aimbot Script for Jailbreak
-
 -- Settings
 local MAX_DISTANCE = 1000  -- Distance for aimbot targeting
 local TOGGLE_AIMBOT = true -- Set to true to enable aimbot
@@ -21,8 +19,8 @@ local function createOrUpdateESP(character, color)
             espLabel = Instance.new("BillboardGui")
             espLabel.Name = "ESPLabel"
             espLabel.Adornee = head
-            espLabel.Size = UDim2.new(0, 200, 0, 50) -- Size for the BillboardGui
-            espLabel.StudsOffset = Vector3.new(0, 3, 0) -- Vertical offset
+            espLabel.Size = UDim2.new(0, 150, 0, 50) -- Size adjusted for better mobile visibility
+            espLabel.StudsOffset = Vector3.new(0, 2, 0) -- Vertical offset
             espLabel.AlwaysOnTop = true
             espLabel.Parent = head
             
@@ -30,9 +28,11 @@ local function createOrUpdateESP(character, color)
             textLabel.Name = "NameLabel"
             textLabel.Size = UDim2.new(1, 0, 1, 0)
             textLabel.BackgroundTransparency = 1
+            textLabel.TextColor3 = color
             textLabel.TextStrokeColor3 = Color3.new(0, 0, 0) -- Black text stroke
-            textLabel.TextStrokeTransparency = 0 -- Opaque text stroke
+            textLabel.TextStrokeTransparency = 0.5 -- Semi-transparent stroke for visibility
             textLabel.TextScaled = true
+            textLabel.TextStrokeTransparency = 0 -- Opaque text stroke
             textLabel.Parent = espLabel
         end
         -- Update the text and color
