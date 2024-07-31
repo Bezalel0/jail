@@ -1,25 +1,73 @@
---/ max distance is 200 studs
-getgenv().toggled = true --/ true & false
+-- Aimbot Script
+getgenv().toggled = true -- Set to true or false to enable/disable aimbot
 
 getgenv().old = getgenv().old or require(game:GetService("ReplicatedStorage").Module.RayCast).RayIgnoreNonCollideWithIgnoreList
 
 if getgenv().toggled then
- require(game:GetService("ReplicatedStorage").Module.RayCast).RayIgnoreNonCollideWithIgnoreList = function(...)
-  local nearestDistance, nearestEnemy = 600, nil
-     for i,v in pairs(game:GetService("Players"):GetPlayers()) do
-      if v.Team ~= game:GetService("Players").LocalPlayer.Team and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
-          if (v.Character.HumanoidRootPart.Position - game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position).Magnitude < nearestDistance then
-           nearestDistance, nearestEnemy = (v.Character.HumanoidRootPart.Position - game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position).Magnitude, v
-          end
-      end
-     end
-     local arg = {old(...)}
-     if (tostring(getfenv(2).script) == "BulletEmitter" or tostring(getfenv(2).script) == "Taser") and nearestEnemy then
-      arg[1] = nearestEnemy.Character.HumanoidRootPart
-      arg[2] = nearestEnemy.Character.HumanoidRootPart.Position
-  end
-     return unpack(arg)
- end
+    require(game:GetService("ReplicatedStorage").Module.RayCast).RayIgnoreNonCollideWithIgnoreList = function(...)
+        local nearestDistance, nearestEnemy = 600, nil
+        for i, v in pairs(game:GetService("Players"):GetPlayers()) do
+            if v.Team ~= game:GetService("Players").LocalPlayer.Team and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
+                if (v.Character.HumanoidRootPart.Position - game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position).Magnitude < nearestDistance then
+                    nearestDistance, nearestEnemy = (v.Character.HumanoidRootPart.Position - game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position).Magnitude, v
+                end
+            end
+        end
+        local arg = {old(...)}
+        if (tostring(getfenv(2).script) == "BulletEmitter" or tostring(getfenv(2).script) == "Taser") and nearestEnemy then
+            arg[1] = nearestEnemy.Character.HumanoidRootPart
+            arg[2] = nearestEnemy.Character.HumanoidRootPart.Position
+        end
+        return unpack(arg)
+    end
 else
- require(game:GetService("ReplicatedStorage").Module.RayCast).RayIgnoreNonCollideWithIgnoreList = getgenv().old
+    require(game:GetService("ReplicatedStorage").Module.RayCast).RayIgnoreNonCollideWithIgnoreList = getgenv().old
 end
+
+-- ESP Script
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local RunService = game:GetService("RunService")
+
+local function createESPBox(part, color)
+    if part:FindFirstChild("ESPBox") then
+        part.ESPBox:Destroy()
+    end
+
+    local BoxHandleAdornment = Instance.new("BoxHandleAdornment")
+    BoxHandleAdornment.Name = "ESPBox"
+    BoxHandleAdornment.Size = part.Size
+    BoxHandleAdornment.Adornee = part
+    BoxHandleAdornment.Color3 = color
+    BoxHandleAdornment.AlwaysOnTop = true
+    BoxHandleAdornment.ZIndex = 1
+    BoxHandleAdornment.Transparency = 0.5
+    BoxHandleAdornment.Parent = part
+end
+
+local function applyESP()
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            local color
+            if player.TeamColor == BrickColor.new("Bright red") then
+                color = Color3.fromRGB(255, 0, 0) -- Red for criminals
+            elseif player.TeamColor == BrickColor.new("Bright orange") then
+                color = Color3.fromRGB(255, 165, 0) -- Orange for prisoners
+            elseif player.TeamColor == BrickColor.new("Bright blue") then
+                color = Color3.fromRGB(173, 216, 230) -- Light blue for cops
+            end
+
+            if color then
+                createESPBox(player.Character.HumanoidRootPart, color)
+            end
+        end
+    end
+end
+
+-- Refresh ESP every 5 seconds
+RunService.Heartbeat:Connect(function()
+    applyESP()
+end)
+
+-- Apply ESP initially
+applyESP()
