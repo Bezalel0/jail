@@ -7,7 +7,7 @@ data = string.gsub(data, '[^'..b..'=]', '') return (data:gsub('.', function(x) i
  
 
 
--- Combined ESP (Police only) and Aimbot Functionality
+
 
 -- ESP Functionality
 local ESP = {}
