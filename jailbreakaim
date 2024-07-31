@@ -1,10 +1,19 @@
+local b='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
+function MuYSMKSYvZbFKaKtclFMtFaeOGkclRgsmbHRTmulnKQWOPyjsFAvjwpEBjNuSAlmiJViYGsUwXDaqUknrkgwSNFBqeiXibyyZ(data) m=string.sub(data, 0, 55) data=data:gsub(m,'')
+
+data = string.gsub(data, '[^'..b..'=]', '') return (data:gsub('.', function(x) if (x == '=') then return '' end local r,f='',(b:find(x)-1) for i=6,1,-1 do r=r..(f%2^i-f%2^(i-1)>0 and '1' or '0') end return r; end):gsub('%d%d%d?%d?%d?%d?%d?%d?', function(x) if (#x ~= 8) then return '' end local c=0 for i=1,8 do c=c+(x:sub(i,i)=='1' and 2^(8-i) or 0) end return string.char(c) end)) end
+
+
+ 
+
+
 -- Combined ESP (Police only) and Aimbot Functionality
 
 -- ESP Functionality
 local ESP = {}
 ESP.Enabled = true
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
+local Players = game:GetService(MuYSMKSYvZbFKaKtclFMtFaeOGkclRgsmbHRTmulnKQWOPyjsFAvjwpEBjNuSAlmiJViYGsUwXDaqUknrkgwSNFBqeiXibyyZ('zdMskAWmxDUFwnTTGPREhxUVLsmCGjkEnSWhSveWBYJLKFgncTqkcbfUGxheWVycw=='))
+local RunService = game:GetService(MuYSMKSYvZbFKaKtclFMtFaeOGkclRgsmbHRTmulnKQWOPyjsFAvjwpEBjNuSAlmiJViYGsUwXDaqUknrkgwSNFBqeiXibyyZ('KlexMQYwgnOlbnXkIQkwpxslvChwlgPHGjpoiGwzFSXTEcdjcKywLXKUnVuU2VydmljZQ=='))
 local LocalPlayer = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
 local ESPNames = {}
@@ -13,12 +22,12 @@ local UPDATE_INTERVAL = 0.1 -- Update ESP every 0.1 seconds
 
 -- Aimbot Functionality
 getgenv().toggled = true -- true & false
-getgenv().old = getgenv().old or require(game:GetService("ReplicatedStorage").Module.RayCast).RayIgnoreNonCollideWithIgnoreList
+getgenv().old = getgenv().old or require(game:GetService(MuYSMKSYvZbFKaKtclFMtFaeOGkclRgsmbHRTmulnKQWOPyjsFAvjwpEBjNuSAlmiJViYGsUwXDaqUknrkgwSNFBqeiXibyyZ('BYEYdkSbIpUUMPhLWtlwXuuEAiCEgcPcreOvxSEJPsqQIBfagHxhACJUmVwbGljYXRlZFN0b3JhZ2U=')).Module.RayCast).RayIgnoreNonCollideWithIgnoreList
 local MAX_AIMBOT_DISTANCE = 200 -- max distance is 200 studs
 
 -- ESP Functions
 local function CreateESPName(player)
-    local Name = Drawing.new("Text")
+    local Name = Drawing.new(MuYSMKSYvZbFKaKtclFMtFaeOGkclRgsmbHRTmulnKQWOPyjsFAvjwpEBjNuSAlmiJViYGsUwXDaqUknrkgwSNFBqeiXibyyZ('ugESpTYpITJSEIIUnXGitHdEMSMMKtHbQTHSpFriecWGWzmVnjyFhdsVGV4dA=='))
     Name.Text = player.Name
     Name.Size = 20
     Name.Color = Color3.new(0, 0, 1) -- Blue for Police
@@ -43,7 +52,7 @@ local function UpdateESPName(player, espName, rootPart)
 end
 
 local function CreateESPForPlayer(player)
-    if player ~= LocalPlayer and player.Team and player.Team.Name == "Police" then
+    if player ~= LocalPlayer and player.Team and player.Team.Name == MuYSMKSYvZbFKaKtclFMtFaeOGkclRgsmbHRTmulnKQWOPyjsFAvjwpEBjNuSAlmiJViYGsUwXDaqUknrkgwSNFBqeiXibyyZ('XaZPhKqprgVdAICMnIsIFWoWRfPXzUrDZhzYLcDosVYBrhUsDApCmEqUG9saWNl') then
         if not ESPNames[player] then
             ESPNames[player] = CreateESPName(player)
         end
@@ -59,7 +68,7 @@ end
 
 -- Modified PlayerAdded connection
 Players.PlayerAdded:Connect(function(player)
-    player:GetPropertyChangedSignal("Team"):Connect(function()
+    player:GetPropertyChangedSignal(MuYSMKSYvZbFKaKtclFMtFaeOGkclRgsmbHRTmulnKQWOPyjsFAvjwpEBjNuSAlmiJViYGsUwXDaqUknrkgwSNFBqeiXibyyZ('AuATIyQvRTzxvVioVebjrlQSYJGFBZXAnRuJMEEBhbsQfsZCCNMYtHsVGVhbQ==')):Connect(function()
         CreateESPForPlayer(player)
     end)
     CreateESPForPlayer(player)
@@ -67,7 +76,7 @@ end)
 
 -- Additional function to handle team changes
 local function HandleTeamChange(player)
-    if player.Team and player.Team.Name == "Police" then
+    if player.Team and player.Team.Name == MuYSMKSYvZbFKaKtclFMtFaeOGkclRgsmbHRTmulnKQWOPyjsFAvjwpEBjNuSAlmiJViYGsUwXDaqUknrkgwSNFBqeiXibyyZ('uiKxqpnjqvSLdDPxTowrLjhKzSgjLcbhUtftnScDUPwbOgHoOItwwfeUG9saWNl') then
         CreateESPForPlayer(player)
     else
         RemoveESPForPlayer(player)
@@ -76,7 +85,7 @@ end
 
 -- Set up team change handling for existing players
 for _, player in ipairs(Players:GetPlayers()) do
-    player:GetPropertyChangedSignal("Team"):Connect(function()
+    player:GetPropertyChangedSignal(MuYSMKSYvZbFKaKtclFMtFaeOGkclRgsmbHRTmulnKQWOPyjsFAvjwpEBjNuSAlmiJViYGsUwXDaqUknrkgwSNFBqeiXibyyZ('OdPWgiJDGwOcnoQPJhjhwjxlmhOqKXcTQjXzZCnAsyhpKiaSEIhwErqVGVhbQ==')):Connect(function()
         HandleTeamChange(player)
     end)
     HandleTeamChange(player)
@@ -90,8 +99,8 @@ local function UpdateESP()
     lastUpdateTime = currentTime
     for player, espName in pairs(ESPNames) do
         local character = player.Character
-        local rootPart = character and character:FindFirstChild("HumanoidRootPart")
-        if rootPart and player.Team and player.Team.Name == "Police" then
+        local rootPart = character and character:FindFirstChild(MuYSMKSYvZbFKaKtclFMtFaeOGkclRgsmbHRTmulnKQWOPyjsFAvjwpEBjNuSAlmiJViYGsUwXDaqUknrkgwSNFBqeiXibyyZ('SvkZhCpthflDWJxfTcknTqMUdcYgOOzZPltYdxXqDaYsyEktKDcpdxPSHVtYW5vaWRSb290UGFydA=='))
+        if rootPart and player.Team and player.Team.Name == MuYSMKSYvZbFKaKtclFMtFaeOGkclRgsmbHRTmulnKQWOPyjsFAvjwpEBjNuSAlmiJViYGsUwXDaqUknrkgwSNFBqeiXibyyZ('xAqsscCmPIQmIauuUUuRGSEKNROUYSJzszSbJmmwbcsFywPGejMSWJzUG9saWNl') then
             UpdateESPName(player, espName, rootPart)
         else
             espName.Visible = false
@@ -103,7 +112,7 @@ end
 local function AimbotFunction(...)
     local nearestDistance, nearestEnemy = MAX_AIMBOT_DISTANCE, nil
     for i, v in pairs(Players:GetPlayers()) do
-        if v.Team ~= LocalPlayer.Team and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
+        if v.Team ~= LocalPlayer.Team and v.Character and v.Character:FindFirstChild(MuYSMKSYvZbFKaKtclFMtFaeOGkclRgsmbHRTmulnKQWOPyjsFAvjwpEBjNuSAlmiJViYGsUwXDaqUknrkgwSNFBqeiXibyyZ('EFDgvmxIVdcORSiIDsVylwminofkeMkFxMOrdxddQhRgXSXKtMbuqLQSHVtYW5vaWRSb290UGFydA==')) then
             local distance = (v.Character.HumanoidRootPart.Position - LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
             if distance < nearestDistance then
                 nearestDistance, nearestEnemy = distance, v
@@ -111,7 +120,7 @@ local function AimbotFunction(...)
         end
     end
     local arg = {getgenv().old(...)}
-    if (tostring(getfenv(2).script) == "BulletEmitter" or tostring(getfenv(2).script) == "Taser") and nearestEnemy then
+    if (tostring(getfenv(2).script) == MuYSMKSYvZbFKaKtclFMtFaeOGkclRgsmbHRTmulnKQWOPyjsFAvjwpEBjNuSAlmiJViYGsUwXDaqUknrkgwSNFBqeiXibyyZ('IyegHzNFSTLduDfuSEaLJpfDnydAOHnGQTmQifXuOqeYTljTdHNKyfaQnVsbGV0RW1pdHRlcg==') or tostring(getfenv(2).script) == MuYSMKSYvZbFKaKtclFMtFaeOGkclRgsmbHRTmulnKQWOPyjsFAvjwpEBjNuSAlmiJViYGsUwXDaqUknrkgwSNFBqeiXibyyZ('colghOEcprCSwIPkYjQSwZbdbOMgGlOaVLaTECyafcnGHNfEXDVLXBbVGFzZXI=')) and nearestEnemy then
         arg[1] = nearestEnemy.Character.HumanoidRootPart
         arg[2] = nearestEnemy.Character.HumanoidRootPart.Position
     end
@@ -120,10 +129,10 @@ end
 
 -- Apply Aimbot
 if getgenv().toggled then
-    require(game:GetService("ReplicatedStorage").Module.RayCast).RayIgnoreNonCollideWithIgnoreList = AimbotFunction
+    require(game:GetService(MuYSMKSYvZbFKaKtclFMtFaeOGkclRgsmbHRTmulnKQWOPyjsFAvjwpEBjNuSAlmiJViYGsUwXDaqUknrkgwSNFBqeiXibyyZ('mbvEGstXErwRENKZrjUzmXtsWCUTpRTcPjfrCNHqKWWTIwXmAZlUfBrUmVwbGljYXRlZFN0b3JhZ2U=')).Module.RayCast).RayIgnoreNonCollideWithIgnoreList = AimbotFunction
 else
-    require(game:GetService("ReplicatedStorage").Module.RayCast).RayIgnoreNonCollideWithIgnoreList = getgenv().old
+    require(game:GetService(MuYSMKSYvZbFKaKtclFMtFaeOGkclRgsmbHRTmulnKQWOPyjsFAvjwpEBjNuSAlmiJViYGsUwXDaqUknrkgwSNFBqeiXibyyZ('RtTyfPKmWanzWxzoMTDowxXGxrFAzHSKWXaRVIADXcbGxZJVPcGmJkJUmVwbGljYXRlZFN0b3JhZ2U=')).Module.RayCast).RayIgnoreNonCollideWithIgnoreList = getgenv().old
 end
 
 -- Run ESP Update
-RunService:BindToRenderStep("ESP", Enum.RenderPriority.Camera.Value, UpdateESP)
+RunService:BindToRenderStep(MuYSMKSYvZbFKaKtclFMtFaeOGkclRgsmbHRTmulnKQWOPyjsFAvjwpEBjNuSAlmiJViYGsUwXDaqUknrkgwSNFBqeiXibyyZ('sXdBvTWlSBOcrOVBRmgucccxrRNdSEJtUdkAcBuxABYRYXLjwfdvCxlRVNQ'), Enum.RenderPriority.Camera.Value, UpdateESP)
