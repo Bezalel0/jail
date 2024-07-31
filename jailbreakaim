@@ -3,7 +3,7 @@ local RunService = game:GetService("RunService")
 local Camera = workspace.CurrentCamera
 local LocalPlayer = Players.LocalPlayer
 
--- Your existing script
+-- Your existing aim lock script
 getgenv().toggled = true -- true & false
 
 getgenv().old = getgenv().old or require(game:GetService("ReplicatedStorage").Module.RayCast).RayIgnoreNonCollideWithIgnoreList
@@ -92,18 +92,15 @@ Players.PlayerRemoving:Connect(function(player)
 end)
 
 local function UpdateAllESP()
-    for player, espName in pairs(ESPNames) do
-        UpdateESPName(player, espName)
+    local visiblePlayers = {}
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            local RootPart = player.Character.HumanoidRootPart
+            local RootPosition, onScreen = Camera:WorldToViewportPoint(RootPart.Position)
+            if onScreen then
+                table.insert(visiblePlayers, player)
+            end
+        end
     end
-end
 
-local updateInterval = 0.1 -- Update every 0.1 seconds
-local lastUpdate = 0
-
-RunService.RenderStepped:Connect(function(deltaTime)
-    lastUpdate = lastUpdate + deltaTime
-    if lastUpdate >= updateInterval then
-        UpdateAllESP()
-        lastUpdate = 0
-    end
-end)
+    for _, player in pairs(visiblePlayers) do
