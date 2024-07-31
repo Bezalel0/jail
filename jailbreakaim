@@ -72,7 +72,6 @@ end
 
 local ESPNames = {}
 local MAX_DISTANCE = 500 -- Max distance for ESP updates
-local UPDATE_INTERVAL = 0.5 -- Update every 0.5 seconds
 
 local function CreateESPForPlayer(player)
     if player ~= LocalPlayer then
@@ -95,7 +94,6 @@ Players.PlayerAdded:Connect(CreateESPForPlayer)
 Players.PlayerRemoving:Connect(RemoveESPForPlayer)
 
 local function UpdateAllESP()
-    local currentTime = tick()
     for player, espName in pairs(ESPNames) do
         if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
             local distance = (player.Character.HumanoidRootPart.Position - LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
@@ -110,11 +108,5 @@ local function UpdateAllESP()
     end
 end
 
-local lastUpdate = 0
-RunService.RenderStepped:Connect(function(deltaTime)
-    lastUpdate = lastUpdate + deltaTime
-    if lastUpdate >= UPDATE_INTERVAL then
-        UpdateAllESP()
-        lastUpdate = 0
-    end
-end)
+-- Continuous updates without delay
+RunService.RenderStepped:Connect(UpdateAllESP)
