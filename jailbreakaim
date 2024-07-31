@@ -71,7 +71,7 @@ local function UpdateESPName(player, espName)
 end
 
 local ESPNames = {}
-local MAX_DISTANCE = 500 -- Max distance for ESP updates
+local MAX_DISTANCE = 1000 -- Increased max distance for ESP
 
 local function CreateESPForPlayer(player)
     if player ~= LocalPlayer then
@@ -93,7 +93,6 @@ end
 Players.PlayerAdded:Connect(CreateESPForPlayer)
 Players.PlayerRemoving:Connect(RemoveESPForPlayer)
 
--- Continuous updates without delay
 RunService.RenderStepped:Connect(function()
     for player, espName in pairs(ESPNames) do
         if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
