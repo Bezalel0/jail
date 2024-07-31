@@ -72,7 +72,7 @@ end
 
 local ESPNames = {}
 local MAX_DISTANCE = 500 -- Max distance for ESP updates
-local MAX_VISIBLE_PLAYERS = 50 -- Max number of visible players to process
+local MAX_VISIBLE_PLAYERS = 30 -- Max number of visible players to process
 
 local function CreateESPForPlayer(player)
     if player ~= LocalPlayer then
@@ -110,6 +110,7 @@ local function UpdateAllESP()
         end
     end
 
+    -- Only update a limited number of visible players
     for i = 1, math.min(#visiblePlayers, MAX_VISIBLE_PLAYERS) do
         UpdateESPName(visiblePlayers[i], ESPNames[visiblePlayers[i]])
     end
