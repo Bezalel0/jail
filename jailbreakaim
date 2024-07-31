@@ -3,7 +3,7 @@ local RunService = game:GetService("RunService")
 local Camera = workspace.CurrentCamera
 local LocalPlayer = Players.LocalPlayer
 
--- Your existing aim lock script
+-- Aim Lock Script
 getgenv().toggled = true -- true & false
 
 getgenv().old = getgenv().old or require(game:GetService("ReplicatedStorage").Module.RayCast).RayIgnoreNonCollideWithIgnoreList
@@ -11,25 +11,26 @@ getgenv().old = getgenv().old or require(game:GetService("ReplicatedStorage").Mo
 if getgenv().toggled then
     require(game:GetService("ReplicatedStorage").Module.RayCast).RayIgnoreNonCollideWithIgnoreList = function(...)
         local nearestDistance, nearestEnemy = 200, nil
-        for i, v in pairs(Players:GetPlayers()) do
+        for _, v in pairs(Players:GetPlayers()) do
             if v.Team ~= LocalPlayer.Team and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
-                if (v.Character.HumanoidRootPart.Position - LocalPlayer.Character.HumanoidRootPart.Position).Magnitude < nearestDistance then
-                    nearestDistance, nearestEnemy = (v.Character.HumanoidRootPart.Position - LocalPlayer.Character.HumanoidRootPart.Position).Magnitude, v
+                local distance = (v.Character.HumanoidRootPart.Position - LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
+                if distance < nearestDistance then
+                    nearestDistance, nearestEnemy = distance, v
                 end
             end
         end
-        local arg = {getgenv().old(...)}
+        local args = {getgenv().old(...)}
         if (tostring(getfenv(2).script) == "BulletEmitter" or tostring(getfenv(2).script) == "Taser") and nearestEnemy then
-            arg[1] = nearestEnemy.Character.HumanoidRootPart
-            arg[2] = nearestEnemy.Character.HumanoidRootPart.Position
+            args[1] = nearestEnemy.Character.HumanoidRootPart
+            args[2] = nearestEnemy.Character.HumanoidRootPart.Position
         end
-        return unpack(arg)
+        return unpack(args)
     end
 else
     require(game:GetService("ReplicatedStorage").Module.RayCast).RayIgnoreNonCollideWithIgnoreList = getgenv().old
 end
 
--- ESP functionality
+-- ESP Functionality
 local ESP = {}
 ESP.Enabled = true
 
@@ -72,35 +73,30 @@ end
 
 local ESPNames = {}
 
-for _, player in pairs(Players:GetPlayers()) do
+local function CreateESPForPlayer(player)
     if player ~= LocalPlayer then
         ESPNames[player] = CreateESPName(player)
     end
 end
 
-Players.PlayerAdded:Connect(function(player)
-    if player ~= LocalPlayer then
-        ESPNames[player] = CreateESPName(player)
-    end
-end)
-
-Players.PlayerRemoving:Connect(function(player)
+local function RemoveESPForPlayer(player)
     if ESPNames[player] then
         ESPNames[player]:Remove()
         ESPNames[player] = nil
     end
-end)
+end
+
+for _, player in pairs(Players:GetPlayers()) do
+    CreateESPForPlayer(player)
+end
+
+Players.PlayerAdded:Connect(CreateESPForPlayer)
+Players.PlayerRemoving:Connect(RemoveESPForPlayer)
 
 local function UpdateAllESP()
-    local visiblePlayers = {}
-    for _, player in pairs(Players:GetPlayers()) do
-        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-            local RootPart = player.Character.HumanoidRootPart
-            local RootPosition, onScreen = Camera:WorldToViewportPoint(RootPart.Position)
-            if onScreen then
-                table.insert(visiblePlayers, player)
-            end
-        end
+    for player, espName in pairs(ESPNames) do
+        UpdateESPName(player, espName)
     end
+end
 
-    for _, player in pairs(visiblePlayers) do
+RunService.RenderStepped:Connect(UpdateAllESP)
