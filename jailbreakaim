@@ -11,7 +11,7 @@ getgenv().old = getgenv().old or require(game:GetService("ReplicatedStorage").Mo
 if getgenv().toggled then
     require(game:GetService("ReplicatedStorage").Module.RayCast).RayIgnoreNonCollideWithIgnoreList = function(...)
         local nearestDistance, nearestEnemy = 200, nil
-        for i,v in pairs(Players:GetPlayers()) do
+        for i, v in pairs(Players:GetPlayers()) do
             if v.Team ~= LocalPlayer.Team and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
                 if (v.Character.HumanoidRootPart.Position - LocalPlayer.Character.HumanoidRootPart.Position).Magnitude < nearestDistance then
                     nearestDistance, nearestEnemy = (v.Character.HumanoidRootPart.Position - LocalPlayer.Character.HumanoidRootPart.Position).Magnitude, v
@@ -91,8 +91,19 @@ Players.PlayerRemoving:Connect(function(player)
     end
 end)
 
-RunService.RenderStepped:Connect(function()
+local function UpdateAllESP()
     for player, espName in pairs(ESPNames) do
         UpdateESPName(player, espName)
+    end
+end
+
+local updateInterval = 0.1 -- Update every 0.1 seconds
+local lastUpdate = 0
+
+RunService.RenderStepped:Connect(function(deltaTime)
+    lastUpdate = lastUpdate + deltaTime
+    if lastUpdate >= updateInterval then
+        UpdateAllESP()
+        lastUpdate = 0
     end
 end)
