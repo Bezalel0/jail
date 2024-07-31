@@ -1,35 +1,17 @@
--- Aimbot Script
-getgenv().toggled = true -- Set to true or false to enable/disable aimbot
+-- Combined ESP and Aimbot Script
 
-getgenv().old = getgenv().old or require(game:GetService("ReplicatedStorage").Module.RayCast).RayIgnoreNonCollideWithIgnoreList
+-- Settings
+local MAX_DISTANCE = 200
+local TOGGLE_AIMBOT = true -- Set to true to enable aimbot
 
-if getgenv().toggled then
-    require(game:GetService("ReplicatedStorage").Module.RayCast).RayIgnoreNonCollideWithIgnoreList = function(...)
-        local nearestDistance, nearestEnemy = 600, nil
-        for i, v in pairs(game:GetService("Players"):GetPlayers()) do
-            if v.Team ~= game:GetService("Players").LocalPlayer.Team and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
-                if (v.Character.HumanoidRootPart.Position - game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position).Magnitude < nearestDistance then
-                    nearestDistance, nearestEnemy = (v.Character.HumanoidRootPart.Position - game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position).Magnitude, v
-                end
-            end
-        end
-        local arg = {old(...)}
-        if (tostring(getfenv(2).script) == "BulletEmitter" or tostring(getfenv(2).script) == "Taser") and nearestEnemy then
-            arg[1] = nearestEnemy.Character.HumanoidRootPart
-            arg[2] = nearestEnemy.Character.HumanoidRootPart.Position
-        end
-        return unpack(arg)
-    end
-else
-    require(game:GetService("ReplicatedStorage").Module.RayCast).RayIgnoreNonCollideWithIgnoreList = getgenv().old
-end
-
--- Enhanced ESP Script
+-- Services
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local RunService = game:GetService("RunService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RayCastModule = require(ReplicatedStorage:WaitForChild("Module"):WaitForChild("RayCast"))
 
--- Function to create or update an ESP box
+-- Function to create or update an ESP box with player names
 local function createOrUpdateESP(character, color)
     local hrp = character:FindFirstChild("HumanoidRootPart")
     if hrp then
@@ -38,22 +20,36 @@ local function createOrUpdateESP(character, color)
             esp = Instance.new("BillboardGui")
             esp.Name = "ESP"
             esp.Adornee = hrp
-            esp.Size = UDim2.new(0, 200, 0, 200) -- Increase size for better visibility
-            esp.StudsOffset = Vector3.new(0, 3, 0) -- Offset above the player
+            esp.Size = UDim2.new(0, 100, 0, 100) -- Size of the ESP box
+            esp.StudsOffset = Vector3.new(0, 2, 0) -- Offset above the player
             esp.AlwaysOnTop = true
             esp.LightInfluence = 0 -- Ensures visibility in all lighting conditions
             esp.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
             esp.Parent = hrp
             
             local frame = Instance.new("Frame")
+            frame.Name = "ESPFrame"
             frame.Parent = esp
             frame.BackgroundColor3 = color
             frame.Size = UDim2.new(1, 0, 1, 0)
             frame.BorderSizePixel = 0
-            frame.BackgroundTransparency = 0.3 -- Semi-transparent for visibility through walls
+            frame.BackgroundTransparency = 0.5 -- Semi-transparent for visibility through walls
+
+            local textLabel = Instance.new("TextLabel")
+            textLabel.Name = "NameLabel"
+            textLabel.Text = character.Name
+            textLabel.Size = UDim2.new(1, 0, 0.2, 0) -- Size for the name label
+            textLabel.Position = UDim2.new(0, 0, 1, 0) -- Positioning below the box
+            textLabel.BackgroundTransparency = 1 -- Transparent background
+            textLabel.TextColor3 = Color3.new(1, 1, 1) -- White text
+            textLabel.TextStrokeColor3 = Color3.new(0, 0, 0) -- Black text stroke
+            textLabel.TextStrokeTransparency = 0 -- Opaque text stroke for better readability
+            textLabel.TextScaled = true
+            textLabel.Parent = esp
         else
             -- Update the color if ESP already exists
-            esp.Frame.BackgroundColor3 = color
+            esp.ESPFrame.BackgroundColor3 = color
+            esp.NameLabel.Text = character.Name -- Update the name label
         end
     end
 end
@@ -71,6 +67,8 @@ local function applyESP()
                 color = Color3.fromRGB(0, 0, 255) -- Blue for cops
             elseif team == "Prisoners" then
                 color = Color3.fromRGB(255, 165, 0) -- Orange for prisoners
+            else
+                color = Color3.fromRGB(255, 255, 255) -- White for unrecognized teams
             end
 
             if color then
@@ -80,7 +78,7 @@ local function applyESP()
     end
 end
 
--- Refresh ESP every 2 seconds
+-- Function to update player ESP distance
 local function refreshESP()
     while true do
         applyESP()
@@ -88,5 +86,35 @@ local function refreshESP()
     end
 end
 
--- Start the ESP refresh loop
+-- Aimbot Implementation
+local function aimbot()
+    local oldRayIgnoreNonCollideWithIgnoreList = RayCastModule.RayIgnoreNonCollideWithIgnoreList
+    if TOGGLE_AIMBOT then
+        RayCastModule.RayIgnoreNonCollideWithIgnoreList = function(...)
+            local nearestDistance, nearestEnemy = MAX_DISTANCE, nil
+            for _, v in pairs(Players:GetPlayers()) do
+                if v.Team ~= LocalPlayer.Team and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
+                    local distance = (v.Character.HumanoidRootPart.Position - LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
+                    if distance < nearestDistance then
+                        nearestDistance, nearestEnemy = distance, v
+                    end
+                end
+            end
+            local args = {oldRayIgnoreNonCollideWithIgnoreList(...)}
+            if nearestEnemy then
+                args[1] = nearestEnemy.Character.HumanoidRootPart
+                args[2] = nearestEnemy.Character.HumanoidRootPart.Position
+            end
+            return unpack(args)
+        end
+    else
+        RayCastModule.RayIgnoreNonCollideWithIgnoreList = oldRayIgnoreNonCollideWithIgnoreList
+    end
+end
+
+-- Run both ESP and Aimbot functionalities
+RunService.Heartbeat:Connect(function()
+    aimbot()
+end)
+
 refreshESP()
