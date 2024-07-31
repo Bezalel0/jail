@@ -38,8 +38,8 @@ local function createOrUpdateESP(character, color)
             esp = Instance.new("BillboardGui")
             esp.Name = "ESP"
             esp.Adornee = hrp
-            esp.Size = UDim2.new(0, 150, 0, 150) -- Size of the ESP box
-            esp.StudsOffset = Vector3.new(0, 2, 0) -- Offset above the player
+            esp.Size = UDim2.new(0, 200, 0, 200) -- Increase size for better visibility
+            esp.StudsOffset = Vector3.new(0, 3, 0) -- Offset above the player
             esp.AlwaysOnTop = true
             esp.LightInfluence = 0 -- Ensures visibility in all lighting conditions
             esp.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
@@ -50,7 +50,7 @@ local function createOrUpdateESP(character, color)
             frame.BackgroundColor3 = color
             frame.Size = UDim2.new(1, 0, 1, 0)
             frame.BorderSizePixel = 0
-            frame.BackgroundTransparency = 0.5 -- Semi-transparent for visibility through walls
+            frame.BackgroundTransparency = 0.3 -- Semi-transparent for visibility through walls
         else
             -- Update the color if ESP already exists
             esp.Frame.BackgroundColor3 = color
@@ -66,7 +66,7 @@ local function applyESP()
             local team = player.Team and player.Team.Name
 
             if team == "Criminals" then
-                color = Color3.fromRGB(200, 0, 0) -- Red for criminals
+                color = Color3.fromRGB(255, 0, 0) -- Red for criminals
             elseif team == "Cops" then
                 color = Color3.fromRGB(0, 0, 255) -- Blue for cops
             elseif team == "Prisoners" then
