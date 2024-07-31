@@ -29,23 +29,29 @@ local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local RunService = game:GetService("RunService")
 
+-- Function to create a more visible ESP Box with darker colors
 local function createESPBox(character, color)
     local hrp = character:FindFirstChild("HumanoidRootPart")
     if hrp then
-        local box = hrp:FindFirstChild("ESPBox")
-        if box then
-            box:Destroy()
+        local esp = hrp:FindFirstChild("ESP")
+        if esp then
+            esp:Destroy()
         end
 
-        local BoxHandleAdornment = Instance.new("BoxHandleAdornment")
-        BoxHandleAdornment.Name = "ESPBox"
-        BoxHandleAdornment.Size = Vector3.new(4, 7, 4) -- Adjust the size as needed
-        BoxHandleAdornment.Adornee = hrp
-        BoxHandleAdornment.Color3 = color
-        BoxHandleAdornment.AlwaysOnTop = true
-        BoxHandleAdornment.ZIndex = 0
-        BoxHandleAdornment.Transparency = 0.5 -- Adjust transparency as needed
-        BoxHandleAdornment.Parent = hrp
+        -- Create a BillboardGui for better visibility
+        local billboard = Instance.new("BillboardGui")
+        billboard.Name = "ESP"
+        billboard.Parent = hrp
+        billboard.Adornee = hrp
+        billboard.Size = UDim2.new(0, 200, 0, 200) -- Increased size for better visibility
+        billboard.StudsOffset = Vector3.new(0, 3, 0) -- Offset the ESP above the player
+
+        local frame = Instance.new("Frame")
+        frame.Parent = billboard
+        frame.BackgroundColor3 = color
+        frame.Size = UDim2.new(1, 0, 1, 0)
+        frame.BorderSizePixel = 0
+        frame.BackgroundTransparency = 0.2 -- Less transparent for better visibility
     end
 end
 
@@ -54,11 +60,11 @@ local function applyESP()
         if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
             local color
             if player.TeamColor == BrickColor.new("Bright red") then
-                color = Color3.fromRGB(255, 0, 0) -- Red for criminals
+                color = Color3.fromRGB(200, 0, 0) -- Darker red for criminals
             elseif player.TeamColor == BrickColor.new("Bright orange") then
-                color = Color3.fromRGB(255, 165, 0) -- Orange for prisoners
+                color = Color3.fromRGB(200, 100, 0) -- Darker orange for prisoners
             elseif player.TeamColor == BrickColor.new("Bright blue") then
-                color = Color3.fromRGB(173, 216, 230) -- Light blue for cops
+                color = Color3.fromRGB(100, 150, 200) -- Darker light blue for cops
             end
 
             if color then
