@@ -1,7 +1,7 @@
 -- Combined ESP and Aimbot Script for Jailbreak
 
 -- Settings
-local MAX_DISTANCE = 1000  -- Increase distance for better visibility
+local MAX_DISTANCE = 1000  -- Distance for aimbot targeting
 local TOGGLE_AIMBOT = true -- Set to true to enable aimbot
 local ESP_REFRESH_INTERVAL = 2 -- Seconds between ESP updates
 
@@ -12,53 +12,39 @@ local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RayCastModule = require(ReplicatedStorage:WaitForChild("Module"):WaitForChild("RayCast"))
 
--- Function to create or update an ESP box with player names
+-- Function to create or update an ESP label with player names and team info
 local function createOrUpdateESP(character, color)
-    local hrp = character:FindFirstChild("HumanoidRootPart")
-    if hrp then
-        local esp = hrp:FindFirstChild("ESP")
-        if not esp then
-            esp = Instance.new("BillboardGui")
-            esp.Name = "ESP"
-            esp.Adornee = hrp
-            esp.Size = UDim2.new(0, 200, 0, 200) -- Adjust size to fit player
-            esp.StudsOffset = Vector3.new(0, 3, 0) -- Adjusted vertical offset
-            esp.AlwaysOnTop = true
-            esp.LightInfluence = 0 -- Ensures visibility in all lighting conditions
-            esp.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-            esp.Parent = hrp
+    local head = character:FindFirstChild("Head")
+    if head then
+        local espLabel = head:FindFirstChild("ESPLabel")
+        if not espLabel then
+            espLabel = Instance.new("BillboardGui")
+            espLabel.Name = "ESPLabel"
+            espLabel.Adornee = head
+            espLabel.Size = UDim2.new(0, 200, 0, 50) -- Size for the BillboardGui
+            espLabel.StudsOffset = Vector3.new(0, 3, 0) -- Vertical offset
+            espLabel.AlwaysOnTop = true
+            espLabel.Parent = head
             
-            local frame = Instance.new("Frame")
-            frame.Name = "ESPFrame"
-            frame.Parent = esp
-            frame.BackgroundColor3 = color
-            frame.Size = UDim2.new(1, 0, 1, 0)
-            frame.BorderSizePixel = 0
-            frame.BackgroundTransparency = 0.5 -- Semi-transparent for visibility through walls
-
             local textLabel = Instance.new("TextLabel")
             textLabel.Name = "NameLabel"
-            textLabel.Text = character.Name
-            textLabel.Size = UDim2.new(1, 0, 0.2, 0) -- Size for the name label
-            textLabel.Position = UDim2.new(0, 0, 1, 0) -- Positioning below the box
-            textLabel.BackgroundTransparency = 1 -- Transparent background
-            textLabel.TextColor3 = Color3.new(1, 1, 1) -- White text
+            textLabel.Size = UDim2.new(1, 0, 1, 0)
+            textLabel.BackgroundTransparency = 1
             textLabel.TextStrokeColor3 = Color3.new(0, 0, 0) -- Black text stroke
-            textLabel.TextStrokeTransparency = 0 -- Opaque text stroke for better readability
+            textLabel.TextStrokeTransparency = 0 -- Opaque text stroke
             textLabel.TextScaled = true
-            textLabel.Parent = esp
-        else
-            -- Update the color if ESP already exists
-            esp.ESPFrame.BackgroundColor3 = color
-            esp.NameLabel.Text = character.Name -- Update the name label
+            textLabel.Parent = espLabel
         end
+        -- Update the text and color
+        espLabel.NameLabel.Text = character.Name -- Player name
+        espLabel.NameLabel.TextColor3 = color
     end
 end
 
 -- Function to apply ESP to all players
 local function applyESP()
     for _, player in pairs(Players:GetPlayers()) do
-        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("Head") then
             local color
             local team = player.Team and player.Team.Name
 
