@@ -1,7 +1,7 @@
--- Optimized ESP and Aimbot Script
+-- Combined ESP and Aimbot Script for Jailbreak
 
 -- Settings
-local MAX_DISTANCE = 200
+local MAX_DISTANCE = 1000  -- Increase distance for better visibility
 local TOGGLE_AIMBOT = true -- Set to true to enable aimbot
 local ESP_REFRESH_INTERVAL = 2 -- Seconds between ESP updates
 
@@ -21,7 +21,7 @@ local function createOrUpdateESP(character, color)
             esp = Instance.new("BillboardGui")
             esp.Name = "ESP"
             esp.Adornee = hrp
-            esp.Size = UDim2.new(0, 50, 0, 50) -- Smaller size for mobile
+            esp.Size = UDim2.new(0, 200, 0, 200) -- Adjust size to fit player
             esp.StudsOffset = Vector3.new(0, 3, 0) -- Adjusted vertical offset
             esp.AlwaysOnTop = true
             esp.LightInfluence = 0 -- Ensures visibility in all lighting conditions
