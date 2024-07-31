@@ -1,4 +1,4 @@
--- Combined ESP and Aimbot Functionality
+-- Combined ESP (Police only) and Aimbot Functionality
 
 -- ESP Functionality
 local ESP = {}
@@ -21,7 +21,7 @@ local function CreateESPName(player)
     local Name = Drawing.new("Text")
     Name.Text = player.Name
     Name.Size = 20
-    Name.Color = Color3.new(1, 1, 1)
+    Name.Color = Color3.new(0, 0, 1) -- Blue for Police
     Name.Center = true
     Name.Outline = true
     Name.Visible = false
@@ -37,17 +37,13 @@ local function UpdateESPName(player, espName, rootPart)
         espName.Size = math.clamp(30 - (distance / 100), 10, 30) -- Adjust size based on distance
         espName.Transparency = math.clamp((MAX_DISTANCE - distance) / MAX_DISTANCE, 0.3, 1)
         espName.Visible = true
-        espName.Color = 
-            player.Team.Name == "Police" and Color3.fromRGB(0, 0, 255) or
-            player.Team.Name == "Criminal" and Color3.fromRGB(255, 0, 0) or
-            Color3.fromRGB(255, 165, 0) -- Prisoner
     else
         espName.Visible = false
     end
 end
 
 local function CreateESPForPlayer(player)
-    if player ~= LocalPlayer then
+    if player ~= LocalPlayer and player.Team and player.Team.Name == "Police" then
         ESPNames[player] = CreateESPName(player)
     end
 end
@@ -76,7 +72,7 @@ local function UpdateESP()
     for player, espName in pairs(ESPNames) do
         local character = player.Character
         local rootPart = character and character:FindFirstChild("HumanoidRootPart")
-        if rootPart then
+        if rootPart and player.Team and player.Team.Name == "Police" then
             UpdateESPName(player, espName, rootPart)
         else
             espName.Visible = false
