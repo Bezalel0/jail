@@ -106,5 +106,42 @@ else
     require(game:GetService("ReplicatedStorage").Module.RayCast).RayIgnoreNonCollideWithIgnoreList = getgenv().old
 end
 
+-- ... (previous code remains the same)
+
+-- Modified CreateESPForPlayer function
+local function CreateESPForPlayer(player)
+    if player ~= LocalPlayer and player.Team and player.Team.Name == "Police" then
+        if not ESPNames[player] then
+            ESPNames[player] = CreateESPName(player)
+        end
+    end
+end
+
+-- Modified PlayerAdded connection
+Players.PlayerAdded:Connect(function(player)
+    player:GetPropertyChangedSignal("Team"):Connect(function()
+        CreateESPForPlayer(player)
+    end)
+    CreateESPForPlayer(player)
+end)
+
+-- Additional function to handle team changes
+local function HandleTeamChange(player)
+    if player.Team and player.Team.Name == "Police" then
+        CreateESPForPlayer(player)
+    else
+        RemoveESPForPlayer(player)
+    end
+end
+
+-- Set up team change handling for existing players
+for _, player in ipairs(Players:GetPlayers()) do
+    player:GetPropertyChangedSignal("Team"):Connect(function()
+        HandleTeamChange(player)
+    end)
+    HandleTeamChange(player)
+end
+
+-- ... (rest of the code remains the same)
 -- Run ESP Update
 RunService:BindToRenderStep("ESP", Enum.RenderPriority.Camera.Value, UpdateESP)
