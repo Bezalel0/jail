@@ -27,35 +27,35 @@ else
     require(ReplicatedStorage.Module.RayCast).RayIgnoreNonCollideWithIgnoreList = getgenv().old
 end
 
--- ESP code
+-- ESP Code
+local espEnabled = false
+local espFolderName = "ESP_FOLDER"
+
 local function createESP(player)
-    local billboard = Instance.new("BillboardGui")
-    billboard.Name = "ESP"
-    billboard.AlwaysOnTop = true
-    billboard.Size = UDim2.new(0, 200, 0, 50)
-    billboard.StudsOffset = Vector3.new(0, 4, 0)
-    
-    local nameLabel = Instance.new("TextLabel")
-    nameLabel.Name = "PlayerName"
-    nameLabel.Size = UDim2.new(1, 0, 0.5, 0)
-    nameLabel.BackgroundTransparency = 1
-    nameLabel.TextScaled = true
-    nameLabel.Font = Enum.Font.SourceSansBold
-    nameLabel.Parent = billboard
-    
-    local teamLabel = Instance.new("TextLabel")
-    teamLabel.Name = "TeamName"
-    teamLabel.Size = UDim2.new(1, 0, 0.5, 0)
-    teamLabel.Position = UDim2.new(0, 0, 0.5, 0)
-    teamLabel.BackgroundTransparency = 1
-    teamLabel.TextScaled = true
-    teamLabel.Font = Enum.Font.SourceSansBold
-    teamLabel.Parent = billboard
-    
-    return billboard
+    local esp = Drawing.new("Text")
+    esp.Visible = false
+    esp.Center = true
+    esp.Outline = true
+    esp.Font = 2
+    esp.Size = 13
+    esp.Color = Color3.new(1, 1, 1)
+    esp.OutlineColor = Color3.new(0, 0, 0)
+    return esp
 end
 
-local espEnabled = false
+local function getTeamColor(player)
+    if player.Team then
+        if player.Team.Name == "Police" then
+            return Color3.new(0, 0, 1) -- Blue
+        elseif player.Team.Name == "Criminal" then
+            return Color3.new(1, 0, 0) -- Red
+        elseif player.Team.Name == "Prisoner" then
+            return Color3.new(1, 0.5, 0) -- Orange
+        end
+    end
+    return Color3.new(1, 1, 1) -- White for unknown
+end
+
 local espObjects = {}
 
 local function updateESP()
@@ -66,35 +66,21 @@ local function updateESP()
                 esp = createESP(player)
                 espObjects[player] = esp
             end
-            
-            esp.Adornee = player.Character.HumanoidRootPart
-            esp.Parent = player.Character.HumanoidRootPart
-            
-            local nameLabel = esp:FindFirstChild("PlayerName")
-            local teamLabel = esp:FindFirstChild("TeamName")
-            
-            if nameLabel and teamLabel then
-                nameLabel.Text = player.Name
-                teamLabel.Text = player.Team and player.Team.Name or "No Team"
-                
-                if player.Team then
-                    if player.Team.Name == "Police" then
-                        nameLabel.TextColor3 = Color3.new(0, 0, 1) -- Blue
-                        teamLabel.TextColor3 = Color3.new(0, 0, 1)
-                    elseif player.Team.Name == "Criminal" then
-                        nameLabel.TextColor3 = Color3.new(1, 0, 0) -- Red
-                        teamLabel.TextColor3 = Color3.new(1, 0, 0)
-                    elseif player.Team.Name == "Prisoner" then
-                        nameLabel.TextColor3 = Color3.new(1, 0.5, 0) -- Orange
-                        teamLabel.TextColor3 = Color3.new(1, 0.5, 0)
-                    else
-                        nameLabel.TextColor3 = Color3.new(1, 1, 1) -- White
-                        teamLabel.TextColor3 = Color3.new(1, 1, 1)
-                    end
+
+            if espEnabled then
+                local vector, onScreen = workspace.CurrentCamera:WorldToViewportPoint(player.Character.HumanoidRootPart.Position)
+                if onScreen then
+                    esp.Position = Vector2.new(vector.X, vector.Y)
+                    local distance = (player.Character.HumanoidRootPart.Position - Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
+                    esp.Text = string.format("%s [%d]", player.Name, math.floor(distance))
+                    esp.Color = getTeamColor(player)
+                    esp.Visible = true
+                else
+                    esp.Visible = false
                 end
+            else
+                esp.Visible = false
             end
-            
-            esp.Enabled = espEnabled
         end
     end
 end
@@ -102,7 +88,7 @@ end
 local function toggleESP()
     espEnabled = not espEnabled
     for _, esp in pairs(espObjects) do
-        esp.Enabled = espEnabled
+        esp.Visible = espEnabled
     end
 end
 
@@ -117,7 +103,7 @@ end)
 Players.PlayerRemoving:Connect(function(player)
     local esp = espObjects[player]
     if esp then
-        esp:Destroy()
+        esp:Remove()
         espObjects[player] = nil
     end
 end)
