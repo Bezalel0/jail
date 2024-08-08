@@ -20,7 +20,7 @@ local isMobile = UserInputService.TouchEnabled and not UserInputService.MouseEna
 
 local function CreateESPName(player)
     local Name = Drawing.new("Text")
-    Name.Text = player.Name
+    Name.Text = player.DisplayName
     Name.Size = isMobile and 14 or 18  -- Smaller size for mobile
     Name.Center = true
     Name.Outline = true
@@ -64,6 +64,7 @@ local function HandleTeamChange(player)
     else
         RemoveESPForPlayer(player)
     end
+    UpdateESP() -- Refresh the ESP
 end
 
 -- Initialize ESP for existing players
@@ -95,6 +96,13 @@ local function UpdateESP()
         else
             espName.Visible = false
         end
+    end
+end
+
+-- Refresh ESP
+function ESP:Refresh()
+    for player, espName in pairs(ESPNames) do
+        HandleTeamChange(player)
     end
 end
 
