@@ -10,6 +10,7 @@ local Camera = workspace.CurrentCamera
 local ESPNames = {}
 local MAX_DISTANCE = 10000
 local MAX_AIMBOT_DISTANCE = 200 -- max distance is 200 studs
+local refreshRate = 5 -- Refresh every 5 seconds
 
 -- Aimbot Functionality
 getgenv().toggled = true -- true & false
@@ -20,7 +21,7 @@ local isMobile = UserInputService.TouchEnabled and not UserInputService.MouseEna
 
 local function CreateESPName(player)
     local Name = Drawing.new("Text")
-    Name.Text = player.DisplayName
+    Name.Text = player.Name
     Name.Size = isMobile and 14 or 18  -- Smaller size for mobile
     Name.Center = true
     Name.Outline = true
@@ -64,7 +65,6 @@ local function HandleTeamChange(player)
     else
         RemoveESPForPlayer(player)
     end
-    UpdateESP() -- Refresh the ESP
 end
 
 -- Initialize ESP for existing players
@@ -99,13 +99,6 @@ local function UpdateESP()
     end
 end
 
--- Refresh ESP
-function ESP:Refresh()
-    for player, espName in pairs(ESPNames) do
-        HandleTeamChange(player)
-    end
-end
-
 -- Aimbot Function
 local function AimbotFunction(...)
     local nearestDistance, nearestEnemy = MAX_AIMBOT_DISTANCE, nil
@@ -131,6 +124,25 @@ if getgenv().toggled then
 else
     require(game:GetService("ReplicatedStorage").Module.RayCast).RayIgnoreNonCollideWithIgnoreList = getgenv().old
 end
+
+-- Refresh ESP Function
+local function RefreshESP()
+    while true do
+        wait(refreshRate)
+        -- Clear existing ESP elements
+        for player, _ in pairs(ESPNames) do
+            RemoveESPForPlayer(player)
+        end
+
+        -- Recreate ESP elements
+        for _, player in ipairs(Players:GetPlayers()) do
+            HandleTeamChange(player)
+        end
+    end
+end
+
+-- Start Refresh ESP loop
+spawn(RefreshESP)
 
 -- Run ESP Update
 RunService:BindToRenderStep("ESP", Enum.RenderPriority.Camera.Value, UpdateESP)
