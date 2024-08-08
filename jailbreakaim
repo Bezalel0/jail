@@ -20,7 +20,7 @@ local isMobile = UserInputService.TouchEnabled and not UserInputService.MouseEna
 
 local function CreateESPName(player)
     local Name = Drawing.new("Text")
-    Name.Text = player.DisplayName
+    Name.Text = player:GetDisplayName()
     Name.Size = isMobile and 14 or 18  -- Smaller size for mobile
     Name.Center = true
     Name.Outline = true
